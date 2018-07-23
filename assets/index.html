@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4"
+        crossorigin="anonymous">
+    <title>Requests</title>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-8">
+                <div class="row">
+                    <div class="col">
+                        <h2>Requests</h2>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-danger" id="clear">Clear</button>
+                    </div>
+                </div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">URL</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">In</th>
+                            <th scope="col">Out</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ $data := . }}
+                        {{ range $i, $interaction := .Interactions }}
+                            <tr data-interaction-index="{{ offsetIndex $i $data.Page }}" {{ if eq (offsetIndex $i $data.Page) $data.Index }} class="table-active" {{ end }}>
+                                <th scope="row">{{ offsetIndex $i $data.Page }}</th>
+                                <td>
+                                    <code>{{ $interaction.Request.Method }} {{ $interaction.Request.URL.String }}</code>
+                                </td>
+                                <td>
+                                    <span class="badge {{ .Response.StatusCode | statusBadgeClass}}">{{ $interaction.Response.StatusCode }} {{ $interaction.Response.StatusCode | statusText }}</span>
+                                </td>
+                                <td>
+                                    {{ if $interaction | requestContentType }}
+                                    <code>{{ $interaction | requestContentType }}</code>
+                                    {{ else }}
+                                    -
+                                    {{ end }}
+                                </td>
+                                <td>
+                                    {{ if $interaction | responseContentType }}
+                                    <code>{{ $interaction | responseContentType }}</code>
+                                    {{ else }}
+                                    -
+                                    {{ end }}
+                                </td>
+                            </tr>
+                        {{ else }}
+                            <tr>
+                                <td colspan="5" style="text-align: center">
+                                    No interactions
+                                </td>
+                            </tr>
+                        {{ end }}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-4">
+                {{ if .Interaction }}
+                    <h3>Timings</h3>
+                    <table class="table table-striped table-sm">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Request Receieved</th>
+                                <td>
+                                    <code>{{ .Interaction.RequestReceived | formatTime }}</code>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Response Finished</th>
+                                <td>
+                                    <code>{{ .Interaction.ResponseReceived | formatTime }}</code>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Duration (seconds)</th>
+                                <td>
+                                    <code>{{ duration .Interaction.RequestReceived .Interaction.ResponseReceived }}</code>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Request</h3>
+                    <table class="table table-striped table-sm">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Method</th>
+                                <td>
+                                    <code>{{ .Interaction.Request.Method }}</code>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">URL</th>
+                                <td>
+                                    <code>{{ .Interaction.Request.URL }}</code>
+                                </td>
+                            </tr>
+                            {{ range $key, $values := .Interaction.Request.Headers }}
+                                {{ range $values}}
+                                    <tr>
+                                        <th scope="row">{{ $key }}</th>
+                                        <td>
+                                            <code>{{ . }}</code>
+                                        </td>
+                                    </tr>
+                                {{ end }}
+                            {{ end }}
+                        </tbody>
+                    </table>
+
+                    {{ if .Interaction.Request.Body }}
+                        <ul>
+                            <li>
+                                <a href="/data?request&amp;index={{ .Index }}&amp;format=json">Request as formatted JSON</a>
+                            </li>
+                            {{ if .Interaction.Request.Headers.Get "Content-Type" }}
+                                <li>
+                                    <a href="/data?request&amp;index={{ .Index }}&amp;content={{ .Interaction.Request.Headers.Get "Content-Type" }}">Request as <code>{{ .Interaction.Request.Headers.Get "Content-Type" }}</code></a>
+                                </li>
+                            {{ end }}
+                            <li>
+                                <a href="/data?request&amp;index={{ .Index }}&amp;content=text/plain">Request as<code>text/plain</code></a>
+                            </li>
+                        </ul>
+                    {{ end }}
+
+                    <h3>Response</h3>
+                    <table class="table table-striped table-sm">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Status Code</th>
+                                <td>
+                                    <code>{{ .Interaction.Response.StatusCode }}</code>
+                                </td>
+                            </tr>
+                            {{ range $key, $values := .Interaction.Response.Headers }}
+                                {{ range $values}}
+                                    <tr>
+                                        <th scope="row">{{ $key }}</th>
+                                        <td>
+                                            <code>{{ . }}</code>
+                                        </td>
+                                    </tr>
+                                {{ end }}
+                            {{ end }}
+                        </tbody>
+                    </table>
+                    <ul>
+                        <li>
+                            <a href="/data?index={{ .Index }}&amp;format=json">Response as formatted JSON</a>
+                        </li>
+                        {{ if .Interaction.Response.Headers.Get "Content-Type" }}
+                            <li>
+                                <a href="/data?index={{ .Index }}&amp;content={{ .Interaction.Response.Headers.Get "Content-Type" }}">Response as <code>{{ .Interaction.Response.Headers.Get "Content-Type" }}</code></a>
+                            </li>
+                        {{ end }}
+                        <li>
+                            <a href="/data?index={{ .Index }}&amp;content=text/plain">Response as<code>text/plain</code></a>
+                        </li>
+                    </ul>
+                {{ else }}
+                    Click on one of the interactions, if there are any
+                {{ end }}
+            </div>
+        </div>
+        <nav>
+            <ul class="pagination justify-content-center">
+                {{ if ne .PrevPage -1 }}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ .PrevPage }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                            <span class="sr-only">Previous</span>
+                        </a>
+                    </li>
+                {{ else }}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                            <span class="sr-only">Previous</span>
+                        </a>
+                    </li>
+                {{ end }}
+                {{ $currentPage := .Page }}
+                {{ range .AllPages }}
+                    <li class="page-item {{ if eq . $currentPage }} active {{ end }}">
+                        <a class="page-link" href="?page={{ . }}">{{ . }}</a>
+                    </li>
+                {{ end }}
+
+                {{ if ne .NextPage -1 }}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ .NextPage }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                            <span class="sr-only">Next</span>
+                        </a>
+                    </li>
+                {{ else }}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                            <span class="sr-only">Next</span>
+                        </a>
+                    </li>
+                {{ end }}
+            </ul>
+        </nav>
+    </div>
+    <form id="gotoForm">
+        <input type="hidden" id="index" name="index" value="{{ .Index }}" />
+        <input type="hidden" id="page" name="page" value="{{ .Page }}" />
+    </form>
+    <form id="clearForm" method="POST">
+        <input type="hidden" name="action" value="clear">
+    </form>
+    <script>
+
+const goToInteraction = (id) => {
+    return () => {
+        document.getElementById("index").value = id;
+        document.getElementById("gotoForm").submit();
+    }
+};
+
+document.querySelectorAll("[data-interaction-index]").forEach((elem) => {
+    const id = elem.getAttribute("data-interaction-index");
+    elem.addEventListener("click", goToInteraction(id));
+});
+
+document.getElementById("clear").addEventListener("click", (e) => {
+    if (window.confirm("You sure you want to clear all interactions?")) {
+        document.getElementById("clearForm").submit();
+    }
+});
+
+    </script>
+</body>
+
+</html>
