@@ -40,6 +40,9 @@ func Middleware(recorder Recorder) func(http.Handler) http.Handler {
 
 			requestBody, err := replaceBody(r)
 
+			// hack around lack of gzip support
+			r.Header.Del("Accept-Encoding")
+
 			next.ServeHTTP(httprec, r)
 			responseReceived := time.Now()
 
