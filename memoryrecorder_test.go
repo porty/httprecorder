@@ -28,7 +28,7 @@ func TestMemoryRecorderRecord(t *testing.T) {
 	end := start.Add(1 * time.Second)
 
 	// TODO does resp need to be a pointer?
-	err := m.Record(req, &resp, start, end)
+	err := m.Record(req, []byte("one=1&two=2"), &resp, start, end)
 
 	require.NoError(t, err)
 

@@ -2,8 +2,10 @@ package httprecorder
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -40,5 +42,44 @@ func TestMiddleware(t *testing.T) {
 
 	require.Equal(t, 404, i.Response.StatusCode)
 	require.Equal(t, "yo", i.Response.Headers.Get("X-Response-Header"))
+	require.Equal(t, "hello!", string(i.Response.Body))
+}
+
+func TestMiddlewarePost(t *testing.T) {
+	var handler http.Handler
+	var receivedBody string
+	handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			panic(err)
+		}
+		r.Body.Close()
+		receivedBody = string(b)
+
+		w.Write([]byte("hello!"))
+	})
+	recorder := NewMemoryRecorder()
+	handler = Middleware(recorder)(handler)
+	server := httptest.NewServer(handler)
+	defer server.Close()
+	req, err := http.NewRequest(http.MethodPost, server.URL+"/butts", ioutil.NopCloser(strings.NewReader("this is request data")))
+	require.NoError(t, err)
+
+	resp, err := http.DefaultClient.Do(req)
+
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	require.Equal(t, "this is request data", receivedBody)
+
+	require.Equal(t, 1, recorder.Length())
+	interactions := recorder.GetInteractions(0, 1)
+	i := interactions[0]
+
+	require.Equal(t, http.MethodPost, i.Request.Method)
+	require.Equal(t, "/butts", i.Request.URL.String())
+	require.Equal(t, "this is request data", string(i.Request.Body))
+
+	require.Equal(t, 200, i.Response.StatusCode)
 	require.Equal(t, "hello!", string(i.Response.Body))
 }
