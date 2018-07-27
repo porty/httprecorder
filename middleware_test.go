@@ -12,8 +12,7 @@ import (
 )
 
 func TestMiddleware(t *testing.T) {
-	var handler http.Handler
-	handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-Response-Header", "yo")
 		w.WriteHeader(404)
 		fmt.Fprint(w, "hello!")

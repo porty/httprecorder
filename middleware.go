@@ -39,6 +39,10 @@ func Middleware(recorder Recorder) func(http.Handler) http.Handler {
 			httprec := httptest.NewRecorder()
 
 			requestBody, err := readAndReplace(&r.Body)
+			if err != nil {
+				// TODO what to do here?
+				log.Print("Error in recorder middleware reading request: " + err.Error())
+			}
 
 			// hack around lack of gzip support
 			r.Header.Del("Accept-Encoding")
@@ -50,7 +54,7 @@ func Middleware(recorder Recorder) func(http.Handler) http.Handler {
 			err = recorder.Record(r, requestBody, resp, requestReceived, responseReceived)
 			if err != nil {
 				// TODO what to do here?
-				log.Print("Error in recorder middleware: " + err.Error())
+				log.Print("Error in recorder middleware recording request: " + err.Error())
 			}
 
 			for k, v := range resp.Header {
