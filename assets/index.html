@@ -128,15 +128,15 @@
                     {{ if .Interaction.Request.Body }}
                         <ul>
                             <li>
-                                <a href="/data?request&amp;index={{ .Index }}&amp;format=json">Request as formatted JSON</a>
+                                <a href="data?request&amp;index={{ .Index }}&amp;format=json">Request as formatted JSON</a>
                             </li>
                             {{ if .Interaction.Request.Headers.Get "Content-Type" }}
                                 <li>
-                                    <a href="/data?request&amp;index={{ .Index }}&amp;content={{ .Interaction.Request.Headers.Get "Content-Type" }}">Request as <code>{{ .Interaction.Request.Headers.Get "Content-Type" }}</code></a>
+                                    <a href="data?request&amp;index={{ .Index }}&amp;content={{ .Interaction.Request.Headers.Get "Content-Type" }}">Request as <code>{{ .Interaction.Request.Headers.Get "Content-Type" }}</code></a>
                                 </li>
                             {{ end }}
                             <li>
-                                <a href="/data?request&amp;index={{ .Index }}&amp;content=text/plain">Request as<code>text/plain</code></a>
+                                <a href="data?request&amp;index={{ .Index }}&amp;content=text/plain">Request as<code>text/plain</code></a>
                             </li>
                         </ul>
                     {{ end }}
@@ -164,15 +164,15 @@
                     </table>
                     <ul>
                         <li>
-                            <a href="/data?index={{ .Index }}&amp;format=json">Response as formatted JSON</a>
+                            <a href="data?index={{ .Index }}&amp;format=json">Response as formatted JSON</a>
                         </li>
                         {{ if .Interaction.Response.Headers.Get "Content-Type" }}
                             <li>
-                                <a href="/data?index={{ .Index }}&amp;content={{ .Interaction.Response.Headers.Get "Content-Type" }}">Response as <code>{{ .Interaction.Response.Headers.Get "Content-Type" }}</code></a>
+                                <a href="data?index={{ .Index }}&amp;content={{ .Interaction.Response.Headers.Get "Content-Type" }}">Response as <code>{{ .Interaction.Response.Headers.Get "Content-Type" }}</code></a>
                             </li>
                         {{ end }}
                         <li>
-                            <a href="/data?index={{ .Index }}&amp;content=text/plain">Response as<code>text/plain</code></a>
+                            <a href="data?index={{ .Index }}&amp;content=text/plain">Response as<code>text/plain</code></a>
                         </li>
                     </ul>
                 {{ else }}
