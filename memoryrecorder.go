@@ -29,12 +29,19 @@ type Interaction struct {
 }
 
 type MemoryRecorder struct {
+	limit int
+
 	m            sync.Mutex
 	interactions []Interaction
 }
 
-func NewMemoryRecorder() *MemoryRecorder {
-	return &MemoryRecorder{}
+func NewMemoryRecorder(limit int) *MemoryRecorder {
+	if limit <= 10 {
+		limit = 10
+	}
+	return &MemoryRecorder{
+		limit: limit,
+	}
 }
 
 func makeRequest(in *http.Request, body []byte) (Request, error) {
@@ -81,6 +88,11 @@ func (m *MemoryRecorder) Record(req *http.Request, requestBody []byte, resp *htt
 	}
 
 	m.m.Lock()
+	if len(m.interactions) >= m.limit {
+		half := m.interactions[len(m.interactions)/2:]
+		m.interactions = make([]Interaction, len(half))
+		copy(m.interactions, half)
+	}
 	m.interactions = append(m.interactions, interaction)
 	m.m.Unlock()
 

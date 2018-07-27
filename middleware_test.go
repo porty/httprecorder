@@ -18,7 +18,7 @@ func TestMiddleware(t *testing.T) {
 		w.WriteHeader(404)
 		fmt.Fprint(w, "hello!")
 	})
-	recorder := NewMemoryRecorder()
+	recorder := NewMemoryRecorder(10)
 	handler = Middleware(recorder)(handler)
 	server := httptest.NewServer(handler)
 	defer server.Close()
@@ -55,7 +55,7 @@ func TestMiddlewarePost(t *testing.T) {
 
 		fmt.Fprint(w, "hello!")
 	})
-	recorder := NewMemoryRecorder()
+	recorder := NewMemoryRecorder(10)
 	handler = Middleware(recorder)(handler)
 	server := httptest.NewServer(handler)
 	defer server.Close()

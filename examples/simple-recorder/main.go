@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	recorder := httprecorder.NewMemoryRecorder()
+	recorder := httprecorder.NewMemoryRecorder(100)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/generateResponse", generateResponse)

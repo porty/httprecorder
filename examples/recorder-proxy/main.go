@@ -58,7 +58,7 @@ func main() {
 
 	log.Print("Connect to http://localhost:9000/ for proxied connections")
 	log.Print("Connect to http://localhost:9004/ for recorder UI")
-	r := httprecorder.NewMemoryRecorder()
+	r := httprecorder.NewMemoryRecorder(100)
 	recordingProxyRouter := httprecorder.Middleware(r)(proxyRouter)
 	go func() {
 		errs <- http.ListenAndServe("localhost:9004", httprecorder.UIHandler(r))

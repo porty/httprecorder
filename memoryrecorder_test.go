@@ -1,10 +1,12 @@
 package httprecorder
 
 import (
+	"bytes"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -13,7 +15,7 @@ import (
 )
 
 func TestMemoryRecorderRecord(t *testing.T) {
-	m := NewMemoryRecorder()
+	m := NewMemoryRecorder(10)
 
 	req := httptest.NewRequest(http.MethodPost, "http://some.server/rofl/copter?cat=dog", ioutil.NopCloser(strings.NewReader("one=1&two=2")))
 	req.Header.Add("User-Agent", "this test")
@@ -54,6 +56,37 @@ func TestMemoryRecorderRecord(t *testing.T) {
 	require.Equal(t, http.StatusOK, i.Response.StatusCode)
 	require.Equal(t, resp.Header, i.Response.Headers)
 	require.Equal(t, "hello, this is a response!", string(i.Response.Body))
+}
+
+func TestMemoryRecorderLimit(t *testing.T) {
+	m := NewMemoryRecorder(20)
+
+	time := time.Now()
+	u, _ := url.Parse("/url")
+	req := http.Request{
+		Method: "GET",
+		URL:    u,
+		Body:   ioutil.NopCloser(bytes.NewReader(nil)),
+	}
+	for i := 0; i < 20; i++ {
+		resp := http.Response{
+			StatusCode: 200 + i,
+			Body:       ioutil.NopCloser(bytes.NewReader(nil)),
+		}
+		require.NoError(t, m.Record(&req, nil, &resp, time, time))
+	}
+
+	require.Equal(t, 20, m.Length())
+
+	resp := http.Response{
+		StatusCode: 220,
+		Body:       ioutil.NopCloser(bytes.NewReader(nil)),
+	}
+	require.NoError(t, m.Record(&req, nil, &resp, time, time))
+
+	require.Equal(t, 11, m.Length())
+	require.Equal(t, 210, m.GetInteraction(0).Response.StatusCode)
+	require.Equal(t, 220, m.GetInteraction(10).Response.StatusCode)
 }
 
 func readString(r io.Reader) string {
