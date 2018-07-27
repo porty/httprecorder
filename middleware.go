@@ -1,7 +1,9 @@
 package httprecorder
 
 import (
+	"bytes"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -9,11 +11,25 @@ import (
 )
 
 type Recorder interface {
-	Record(req *http.Request, resp *http.Response, requestReceived time.Time, responseReceived time.Time) error
+	Record(req *http.Request, requestBody []byte, resp *http.Response, requestReceived time.Time, responseReceived time.Time) error
 	Length() int
 	GetInteractions(start int, length int) []Interaction
 	GetInteraction(index int) Interaction
 	Clear()
+}
+
+func readAndReplace(body *io.ReadCloser) ([]byte, error) {
+	b, err := ioutil.ReadAll(*body)
+	if err != nil {
+		return nil, err
+	}
+	(*body).Close()
+	*body = ioutil.NopCloser(bytes.NewReader(b))
+
+	if len(b) == 0 {
+		b = nil
+	}
+	return b, nil
 }
 
 func Middleware(recorder Recorder) func(http.Handler) http.Handler {
@@ -22,6 +38,8 @@ func Middleware(recorder Recorder) func(http.Handler) http.Handler {
 			requestReceived := time.Now()
 			httprec := httptest.NewRecorder()
 
+			requestBody, err := readAndReplace(&r.Body)
+
 			// hack around lack of gzip support
 			r.Header.Del("Accept-Encoding")
 
@@ -29,7 +47,7 @@ func Middleware(recorder Recorder) func(http.Handler) http.Handler {
 			responseReceived := time.Now()
 
 			resp := httprec.Result()
-			err := recorder.Record(r, resp, requestReceived, responseReceived)
+			err = recorder.Record(r, requestBody, resp, requestReceived, responseReceived)
 			if err != nil {
 				// TODO what to do here?
 				log.Print("Error in recorder middleware: " + err.Error())

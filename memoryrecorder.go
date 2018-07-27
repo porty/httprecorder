@@ -1,9 +1,7 @@
 package httprecorder
 
 import (
-	"bytes"
 	"errors"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"sync"
@@ -39,37 +37,24 @@ func NewMemoryRecorder() *MemoryRecorder {
 	return &MemoryRecorder{}
 }
 
-func makeRequest(in *http.Request) (Request, error) {
+func makeRequest(in *http.Request, body []byte) (Request, error) {
 	// TODO gzip encoding??
-	b, err := ioutil.ReadAll(in.Body)
-	_ = in.Body.Close()
-	if err != nil {
-		return Request{}, errors.New("failed to read request body: " + err.Error())
-	}
-	if len(b) == 0 {
-		b = nil
-	}
-	in.Body = ioutil.NopCloser(bytes.NewReader(b))
-
 	return Request{
 		Method:  in.Method,
 		URL:     in.URL,
 		Headers: in.Header,
-		Body:    b,
+		Body:    body,
 	}, nil
 }
 
 func makeResponse(in *http.Response) (Response, error) {
-	// TODO gzip encoding??
-	b, err := ioutil.ReadAll(in.Body)
-	_ = in.Body.Close()
+	b, err := readAndReplace(&in.Body)
 	if err != nil {
 		return Response{}, errors.New("failed to read response body: " + err.Error())
 	}
 	if len(b) == 0 {
 		b = nil
 	}
-	in.Body = ioutil.NopCloser(bytes.NewReader(b))
 
 	return Response{
 		StatusCode: in.StatusCode,
@@ -78,9 +63,9 @@ func makeResponse(in *http.Response) (Response, error) {
 	}, nil
 }
 
-func (m *MemoryRecorder) Record(req *http.Request, resp *http.Response, requestReceived time.Time, responseReceived time.Time) error {
+func (m *MemoryRecorder) Record(req *http.Request, requestBody []byte, resp *http.Response, requestReceived time.Time, responseReceived time.Time) error {
 	// TODO this doesn't make a copy of any of the parameters, pointers (and maps) could change via other middleware
-	recReq, err := makeRequest(req)
+	recReq, err := makeRequest(req, requestBody)
 	if err != nil {
 		return err
 	}
