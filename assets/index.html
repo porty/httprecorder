@@ -19,7 +19,10 @@
                         <h2>Requests</h2>
                     </div>
                     <div>
-                        <button type="button" class="btn btn-danger" id="clear">Clear</button>
+                        <div class="btn-group" role="group" aria-label="Utility buttons">
+                            <a class="btn btn-primary" href="?" role="button">Refresh</a>
+                            <button type="button" class="btn btn-danger" id="clear">Clear</button>
+                        </div>
                     </div>
                 </div>
                 <table class="table table-striped">
@@ -223,7 +226,7 @@
         <input type="hidden" id="index" name="index" value="{{ .Index }}" />
         <input type="hidden" id="page" name="page" value="{{ .Page }}" />
     </form>
-    <form id="clearForm" method="POST">
+    <form id="clearForm" method="POST" action="?">
         <input type="hidden" name="action" value="clear">
     </form>
     <script>
