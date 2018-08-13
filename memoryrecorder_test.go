@@ -56,6 +56,9 @@ func TestMemoryRecorderRecord(t *testing.T) {
 	require.Equal(t, http.StatusOK, i.Response.StatusCode)
 	require.Equal(t, resp.Header, i.Response.Headers)
 	require.Equal(t, "hello, this is a response!", string(i.Response.Body))
+
+	m.Clear()
+	require.Equal(t, 0, m.Length())
 }
 
 func TestMemoryRecorderLimit(t *testing.T) {
