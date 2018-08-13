@@ -90,7 +90,7 @@ func (m *MemoryRecorder) Record(req *http.Request, requestBody []byte, resp *htt
 	m.m.Lock()
 	if len(m.interactions) >= m.limit {
 		half := m.interactions[len(m.interactions)/2:]
-		m.interactions = make([]Interaction, len(half))
+		m.interactions = make([]Interaction, len(half), len(half)+1)
 		copy(m.interactions, half)
 	}
 	m.interactions = append(m.interactions, interaction)
