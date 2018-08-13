@@ -25,7 +25,7 @@
                         </div>
                     </div>
                 </div>
-                <table class="table table-striped">
+                <table class="table table-striped" data-test-name="interactions-table">
                     <thead>
                         <tr>
                             <th scope="col">#</th>
@@ -74,7 +74,7 @@
             <div class="col-4">
                 {{ if .Interaction }}
                     <h3>Timings</h3>
-                    <table class="table table-striped table-sm">
+                    <table class="table table-striped table-sm" data-test-name="timings">
                         <tbody>
                             <tr>
                                 <th scope="row">Request Receieved</th>
@@ -98,7 +98,7 @@
                     </table>
 
                     <h3>Request</h3>
-                    <table class="table table-striped table-sm">
+                    <table class="table table-striped table-sm" data-test-name="request">
                         <tbody>
                             <tr>
                                 <th scope="row">Method</th>
@@ -142,7 +142,7 @@
                     {{ end }}
 
                     <h3>Response</h3>
-                    <table class="table table-striped table-sm">
+                    <table class="table table-striped table-sm" data-test-name="response">
                         <tbody>
                             <tr>
                                 <th scope="row">Status Code</th>
