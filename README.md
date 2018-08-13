@@ -32,5 +32,5 @@ The HTML template is embedded in to the source using [esc](https://github.com/mj
 go get -u github.com/mjibson/esc
 
 # create static_generated.go
-esc -o static_generated.go -pkg httprecorder assets
+esc -o embedded/static_generated.go -pkg embedded assets
 ```

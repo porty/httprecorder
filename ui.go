@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
+
+	"github.com/porty/httprecorder/embedded"
 )
 
 func UIHandler(recorder Recorder) http.Handler {
@@ -73,7 +75,7 @@ func index(recorder Recorder) func(http.ResponseWriter, *http.Request) {
 		"formatTime":          formatTime,
 		"duration":            duration,
 		"offsetIndex":         offsetIndex,
-	}).Parse(FSMustString(false, "/assets/index.html")))
+	}).Parse(embedded.FSMustString(false, "/assets/index.html")))
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.FormValue("action") == "clear" {
