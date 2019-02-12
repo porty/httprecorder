@@ -79,3 +79,22 @@ func TestMiddlewarePost(t *testing.T) {
 	require.Equal(t, 200, i.Response.StatusCode)
 	require.Equal(t, "hello!", string(i.Response.Body))
 }
+
+func TestMiddlewareWithNilBody(t *testing.T) {
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		fmt.Fprint(w, "hello!")
+	})
+	recorder := NewMemoryRecorder(10)
+	handler = Middleware(recorder)(handler)
+
+	req, err := http.NewRequest(http.MethodGet, "https://whatever/butts", nil)
+	require.NoError(t, err)
+
+	w := httptest.NewRecorder()
+
+	handler.ServeHTTP(w, req)
+
+	require.Equal(t, 200, w.Code)
+	require.Equal(t, "hello!", w.Body.String())
+}

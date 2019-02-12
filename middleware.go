@@ -19,7 +19,12 @@ type Recorder interface {
 }
 
 func readAndReplace(body *io.ReadCloser) ([]byte, error) {
+	if *body == nil {
+		// this only happens when testing directly with a hand built request object
+		return nil, nil
+	}
 	b, err := ioutil.ReadAll(*body)
+
 	if err != nil {
 		return nil, err
 	}
