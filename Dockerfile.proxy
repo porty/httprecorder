@@ -1,0 +1,17 @@
+FROM golang:alpine AS builder
+
+WORKDIR /go/src/github.com/porty/httprecorder
+COPY . .
+
+RUN apk add -U git
+RUN \
+    cd examples/proxy && \
+    go get -d . && \
+    CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o /proxy .
+
+FROM scratch
+
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=builder /proxy /proxy
+
+ENTRYPOINT ["/proxy"]
